@@ -1,81 +1,48 @@
 import time
 import psycopg2
-from psycopg2.extras import RealDictCursor 
+from starlette.status import HTTP_404_NOT_FOUND
+from . import database
+from . import models
+from typing import List
 from fastapi import FastAPI, status, HTTPException
-from pydantic import BaseModel
+from sqlmodel import Session, select
 
 app = FastAPI()
 
-while True:
-    try:
-        conn = psycopg2.connect(
-            host='localhost', 
-            database='webapp', 
-            user='postgres', 
-            password='',
-            cursor_factory=RealDictCursor,
-        )
-        cursor = conn.cursor()
-        print('=== DB connected ===')
-        break
-    except Exception as e:
-        print('=== Connection to DB failed ===')
-        time.sleep(5)
-
-class Post(BaseModel):
-    title: str
-    content: str
-
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
-def create_post(post: Post):
-    cursor.execute(
-        """INSERT INTO posts (title, content) VALUES (%s, %s) RETURNING *""",
-        (post.title, post.content)
-    )
-    new_post = cursor.fetchone()
-    conn.commit()
-    return {'data': new_post}
+def create_post(post: models.Posts):
+    with Session(database.engine) as session:
+        new_post = models.Posts(title=post.title, content=post.content)
+        session.add(new_post)
+        session.commit()
+        session.refresh(new_post)
+    return new_post
 
-
-@app.get("/posts")
+@app.get("/posts", response_model=List[models.Posts])
 def read_posts():
-    cursor.execute("""SELECT * FROM posts""")
-    posts = cursor.fetchall()
-    return {'data': posts}
+    with Session(database.engine) as session:
+        posts = session.exec(select(models.Posts)).all()
+    return posts
 
-
-@app.get("/posts/{id}")
+@app.get("/posts/{id}", response_model=models.Posts)
 def read_posts_id(id: int):
-    cursor.execute("""SELECT * FROM posts WHERE id = %s""", (str(id),))
-    post = cursor.fetchone()
-    if post == None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Post with id {id} was not found')
-    return {'data': post}
-
+    with Session(database.engine) as session:
+        post = session.get(models.Posts, id)
+    if not post:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f'Post with id {id} was not found.')
+    else:
+        return post
 
 @app.put("/posts/{id}")
-def update_post(id: int, post: Post):
-    cursor.execute(
-        """
-        UPDATE posts
-        SET title = %s, content = %s
-        WHERE id = %s
-        RETURNING *
-        """,
-        (post.title, post.content, str(id))
-    )
-    updated_post = cursor.fetchone()
-    conn.commit()
-    if updated_post == None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Post with id {id} was not found')
-    return {'data': updated_post}
+def update_post(id: int, new_post: models.Posts):
+    with Session(database.engine) as session:
+        old_post = session.exec(select(models.Posts).where(models.Posts.id == id)).one() # Type gets weird if by session.get
+        old_post.title = new_post.title
+        old_post.content = new_post.content
+        session.add(old_post)
+        session.commit()
+        session.refresh(old_post)
+    return old_post
         
-
-@app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_post(id: int):
-    cursor.execute("""DELETE FROM posts WHERE id = %s RETURNING *""", (str(id),))
-    deleted_post = cursor.fetchone()
-    conn.commit()
-    if deleted_post == None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Post with id {id} was not found')
-    return {'message': 'Post with id {id} has been deleted'}
+#@app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
+#def delete_post(id: int):

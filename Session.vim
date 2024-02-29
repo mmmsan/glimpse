@@ -3,7 +3,7 @@ let s:so_save = &g:so | let s:siso_save = &g:siso | setg so=0 siso=0 | setl so=-
 let v:this_session=expand("<sfile>:p")
 silent only
 silent tabonly
-cd ~/HDDS/projects/webapp/app
+cd ~/HDDS/projects/glimpse
 if expand('%') == '' && !&modified && line('$') <= 1 && getline(1) == ''
   let s:wipebuf = bufnr('%')
 endif
@@ -13,14 +13,14 @@ if &shortmess =~ 'A'
 else
   set shortmess=aoO
 endif
-badd +1 main.py
-badd +1 term://~/HDDS/projects/webapp/app//44714:/bin/bash
+badd +15 app/main.py
+badd +2 term://~/HDDS/projects/glimpse//12129:/bin/bash
 argglobal
 %argdel
-$argadd main.py
-edit main.py
+$argadd app/main.py
+edit app/main.py
 argglobal
-balt term://~/HDDS/projects/webapp/app//44714:/bin/bash
+balt term://~/HDDS/projects/glimpse//12129:/bin/bash
 setlocal fdm=manual
 setlocal fde=0
 setlocal fmr={{{,}}}
@@ -31,12 +31,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 6 - ((5 * winheight(0) + 18) / 37)
+let s:l = 14 - ((13 * winheight(0) + 18) / 37)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 6
-normal! 0
+keepjumps 14
+normal! 024|
 tabnext 1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf
