@@ -1,7 +1,20 @@
-from typing import List, Optional
-from sqlmodel import Field, Relationship, SQLModel
+from typing import Optional
+from sqlmodel import Field, SQLModel
 
-class Posts(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+
+class PostBase(SQLModel):
     title: str
     content: str
+
+
+class Posts(PostBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+
+
+class PostCreate(PostBase):
+    pass
+
+
+class PostRead(PostBase):
+    pass
+
