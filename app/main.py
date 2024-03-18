@@ -1,13 +1,12 @@
-import time
-import psycopg2
-from starlette.status import HTTP_404_NOT_FOUND
 from . import database
 from . import models
+from starlette.status import HTTP_404_NOT_FOUND
 from typing import List
 from fastapi import FastAPI, status, HTTPException
 from sqlmodel import Session, select
 
 app = FastAPI()
+
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
 def create_post(post: models.Posts):
@@ -18,11 +17,13 @@ def create_post(post: models.Posts):
         session.refresh(new_post)
     return new_post
 
+
 @app.get("/posts", response_model=List[models.Posts])
 def read_posts():
     with Session(database.engine) as session:
         posts = session.exec(select(models.Posts)).all()
     return posts
+
 
 @app.get("/posts/{id}", response_model=models.Posts)
 def read_posts_id(id: int):
@@ -33,10 +34,11 @@ def read_posts_id(id: int):
     else:
         return post
 
+
 @app.put("/posts/{id}")
 def update_post(id: int, new_post: models.Posts):
+    old_post = read_posts_id(id)
     with Session(database.engine) as session:
-        old_post = session.exec(select(models.Posts).where(models.Posts.id == id)).one() # Type gets weird if by session.get
         old_post.title = new_post.title
         old_post.content = new_post.content
         session.add(old_post)
@@ -44,5 +46,10 @@ def update_post(id: int, new_post: models.Posts):
         session.refresh(old_post)
     return old_post
         
-#@app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
-#def delete_post(id: int):
+
+@app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_post(id: int):
+    post = read_posts_id(id)
+    with Session(database.engine) as session:
+        session.delete(post)
+        session.commit()
