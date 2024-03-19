@@ -1,6 +1,7 @@
 from typing import Optional
 from datetime import datetime
-from sqlmodel import Field, SQLModel 
+from sqlmodel import Field, SQLModel, AutoString
+from pydantic import EmailStr
 
 
 class PostBase(SQLModel):
@@ -24,11 +25,14 @@ class PostRead(PostBase):
 # ---
 
 
-class UserBase(SQLModel):
-    email: str = Field(unique=True)
+class Users(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    email: EmailStr = Field(unique=True, sa_type=AutoString)
     password: str
     created_at: Optional[datetime] = Field(default=datetime.now())
 
 
-class Users(UserBase, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+class UserResponse(SQLModel):
+    id: int
+    email: EmailStr
+    created_at: Optional[datetime] = Field(default=datetime.now())

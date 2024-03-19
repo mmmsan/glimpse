@@ -1,4 +1,4 @@
-from starlette.status import HTTP_404_NOT_FOUND
+from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 from typing import List
 from fastapi import FastAPI, status, HTTPException
 from sqlmodel import Session, select
@@ -7,8 +7,8 @@ from .models import *
 
 app = FastAPI()
 
-@app.post("/posts", status_code=status.HTTP_201_CREATED)
-def create_post(post: PostCreate):
+@app.post("/posts", status_code=status.HTTP_201_CREATED, response_model=PostCreate)
+def create_post(post: Posts):
     with Session(engine) as session:
         new_post = Posts(title=post.title, content=post.content)
         session.add(new_post)
@@ -54,9 +54,33 @@ def delete_post(id: int):
         session.commit()
 
 
+# ---
+
+
+@app.post("/users", status_code=status.HTTP_201_CREATED, response_model=UserResponse)
+def create_user(user: Users):
+    with Session(engine) as session:
+        new_user = Users(email=user.email, password=user.password)
+        try:
+            session.add(new_user)
+            session.commit()
+            session.refresh(new_user)
+        except:
+            raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail=f'E-mail already in use.')
+    return new_user
+
+
+# --- 
+
+
 def main():
     create_db_and_tables()
 
 
 if __name__ == "__main__":
     main()
+
+
+
+
+
