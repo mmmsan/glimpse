@@ -19,7 +19,7 @@ class PostCreate(PostBase):
 
 
 class PostRead(PostBase):
-    id: int
+    pass
 
 
 # ---
