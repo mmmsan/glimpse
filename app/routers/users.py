@@ -3,10 +3,13 @@ from fastapi import status, HTTPException, APIRouter
 from sqlmodel import Session
 from .. import db, models, utils
 
-router = APIRouter()
+router = APIRouter(
+    prefix='/users',
+    tags=['users']
+)
 
 
-@router.get('/users/{id}', response_model=models.UserResponse)
+@router.get('/{id}', response_model=models.UserResponse)
 def read_user_id(id: int):
     with Session(db.engine) as session:
         user = session.get(models.Users, id)
@@ -16,7 +19,7 @@ def read_user_id(id: int):
             return user
 
 
-@router.post("/users", status_code=status.HTTP_201_CREATED, response_model=models.UserResponse)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=models.UserResponse)
 def create_user(user: models.Users):
     user.password = utils.hash(user.password)
     with Session(db.engine) as session:

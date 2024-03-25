@@ -4,10 +4,13 @@ from fastapi import APIRouter, status, HTTPException
 from sqlmodel import Session, select
 from .. import db, models 
 
-router = APIRouter()
+router = APIRouter(
+    prefix='/posts',
+    tags=['posts']
+)
 
 
-@router.post("/posts", status_code=status.HTTP_201_CREATED, response_model=models.PostCreate)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=models.PostCreate)
 def create_post(post: models.Posts):
     with Session(db.engine) as session:
         new_post = models.Posts(title=post.title, content=post.content)
@@ -17,14 +20,14 @@ def create_post(post: models.Posts):
     return new_post
 
 
-@router.get("/posts", response_model=List[models.PostRead])
+@router.get("/", response_model=List[models.PostRead])
 def read_posts():
     with Session(db.engine) as session:
         posts = session.exec(select(models.Posts)).all()
     return posts
 
 
-@router.get("/posts/{id}", response_model=models.PostRead)
+@router.get("/{id}", response_model=models.PostRead)
 def read_posts_id(id: int):
     with Session(db.engine) as session:
         post = session.get(models.Posts, id)
@@ -34,7 +37,7 @@ def read_posts_id(id: int):
         return post
 
 
-@router.put("/posts/{id}")
+@router.put("/{id}")
 def update_post(id: int, new_post: models.PostRead):
     old_post = read_posts_id(id)
     with Session(db.engine) as session:
@@ -46,7 +49,7 @@ def update_post(id: int, new_post: models.PostRead):
     return old_post
         
 
-@router.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(id: int):
     post = read_posts_id(id)
     with Session(db.engine) as session:
