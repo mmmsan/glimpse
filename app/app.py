@@ -58,11 +58,19 @@ def delete_post(id: int):
 # ---
 
 
+@app.get('/users/{id}', response_model=UserResponse)
+def read_user_id(id: int):
+    with Session(engine) as session:
+        user = session.get(Users, id)
+        if not user:
+            raise HTTPException(status_code=HTTP_404_NOT_FOUND, detail=f'User with id {id} was not found.')
+        else:
+            return user
+
+
 @app.post("/users", status_code=status.HTTP_201_CREATED, response_model=UserResponse)
 def create_user(user: Users):
-
     user.password = hash(user.password)
-
     with Session(engine) as session:
         new_user = Users(email=user.email, password=user.password)
         try:
@@ -74,6 +82,7 @@ def create_user(user: Users):
     return new_user
 
 
+
 # --- 
 
 
@@ -83,8 +92,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
