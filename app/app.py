@@ -4,6 +4,7 @@ from fastapi import FastAPI, status, HTTPException
 from sqlmodel import Session, select
 from .db import *
 from .models import *
+from .utils import *
 
 app = FastAPI()
 
@@ -59,6 +60,9 @@ def delete_post(id: int):
 
 @app.post("/users", status_code=status.HTTP_201_CREATED, response_model=UserResponse)
 def create_user(user: Users):
+
+    user.password = hash(user.password)
+
     with Session(engine) as session:
         new_user = Users(email=user.email, password=user.password)
         try:
