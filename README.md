@@ -1,1 +1,1 @@
-fastapi & sqlmodel pratice
+fastapi & sqlmodel annotation project
