@@ -32,7 +32,7 @@ async def create_post(post: models.Posts):
     response_model=List[models.PostRead],
     summary="busca todos os posts",
 )
-async def read_posts():
+async def read_all_posts():
     with Session(db.engine) as session:
         posts = session.exec(select(models.Posts)).all()
     return posts

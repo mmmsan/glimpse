@@ -1,30 +1,33 @@
+from starlette.types import HTTPExceptionHandler
 from config import settings
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
+from fastapi import APIRouter, Depends, status, HTTPException, Response
 from jose import jwt
-from models import Users
-from passlib.context import CryptContext
+from models import Users, UserLogin
+from config import CRYPTO
 from pydantic import EmailStr    
 from pytz import timezone
 from sqlmodel import select, Session
 import db
 
+router = APIRouter(tags=['Authentication'])
 
-CRYPTO = CryptContext(schemes=['bcrypt'], deprecated='auto')
+@router.post('/login')
+def login(cred: UserLogin):
+    with Session(db.engine) as session:
+        user = session.exec(select(Users).where(Users.email == cred.email)).first()
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Invalid credentials')
+        if not CRYPTO.verify(cred.password, user.password):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Invalid credentials')
+        #return user
+        return {"login": "Successfully logged in"}
+
 
 oauth2_schema = OAuth2PasswordBearer(
     tokenUrl="/login"
 )
-
-
-async def auth(email: EmailStr, password: str):
-    with Session(db.engine) as session:
-        user = session.exec(select(Users).where(Users.email == email)).one()
-        if not user:
-            return None
-        if not CRYPTO.verify(password, user.password):
-            return None
-        return user
 
 
 def _create_token(token_type: str, lifetime: timedelta, subj: str) -> str:

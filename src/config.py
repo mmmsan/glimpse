@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from passlib.context import CryptContext
 
 
 class Settings(BaseSettings):
@@ -9,3 +10,8 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+CRYPTO = CryptContext(schemes=['bcrypt'], deprecated='auto')
+
+
+
+

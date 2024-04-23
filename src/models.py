@@ -1,5 +1,6 @@
 from typing import Optional
 from datetime import datetime
+from sqlalchemy.sql.roles import SQLRole
 from sqlmodel import Field, SQLModel, AutoString
 from pydantic import EmailStr
 
@@ -36,4 +37,10 @@ class Users(UserBase, table=True):
 
 
 class UserResponse(UserBase):
+    id: int
     pass
+
+
+class UserLogin(SQLModel):
+    email: EmailStr
+    password: str

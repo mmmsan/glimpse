@@ -1,7 +1,8 @@
-from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
+from config import CRYPTO
 from fastapi import status, HTTPException, APIRouter
-from sqlmodel import Session
-from auth import CRYPTO
+from sqlmodel import Session, select
+from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
+from typing import List
 import models
 import db
 
@@ -32,6 +33,19 @@ async def create_user(user: models.Users):
 
 
 @router.get(
+    '/',
+    summary='busca todos usuarios',
+    description='',
+    response_description='',
+    response_model=List[models.UserResponse],
+)
+async def read_all_users():
+    with Session(db.engine) as session:
+        users = session.exec(select(models.Users)).all()
+    return users
+
+
+@router.get(
     "/{id}",
     summary="busca um usuario especifico",
     description="",
@@ -48,3 +62,6 @@ async def read_user_id(id: int):
             )
         else:
             return user
+
+
+
