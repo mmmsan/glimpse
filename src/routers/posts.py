@@ -9,11 +9,12 @@ router = APIRouter(prefix="/posts", tags=["posts"])
 
 
 @router.post("/", 
-             summary='cria um novo post',
              description='',
-             status_code=status.HTTP_201_CREATED, 
              response_description='',
-             response_model=models.PostCreate)
+             response_model=models.PostCreate,
+             status_code=status.HTTP_201_CREATED, 
+             summary='cria um novo post',
+             )
 async def create_post(post: models.Posts):
     with Session(db.engine) as session:
         new_post = models.Posts(title=post.title, content=post.content)
@@ -24,10 +25,11 @@ async def create_post(post: models.Posts):
 
 
 @router.get("/", 
-            summary='busca todos os posts',
-            response_description='',
             description='',
-            response_model=List[models.PostRead])
+            response_description='',
+            response_model=List[models.PostRead],
+            summary='busca todos os posts',
+            )
 async def read_posts():
     with Session(db.engine) as session:
         posts = session.exec(select(models.Posts)).all()
@@ -35,10 +37,11 @@ async def read_posts():
 
 
 @router.get("/{id}", 
-            summary='busca um post especifico',
             description='',
             response_description='',
-            response_model=models.PostRead)
+            response_model=models.PostRead,
+            summary='busca um post especifico',
+            )
 async def read_posts_id(id: int):
     with Session(db.engine) as session:
         post = session.get(models.Posts, id)
@@ -51,12 +54,12 @@ async def read_posts_id(id: int):
 
 
 @router.put("/{id}",
-            summary='atualiza um post especifico',
-            response_description='atualizado com sucesso',
             description='',
+            response_description='atualizado com sucesso',
+            summary='atualiza um post especifico',
             )
 async def update_post(id: int, new_post: models.PostRead):
-    old_post = read_posts_id(id)
+    old_post = await read_posts_id(id)
     with Session(db.engine) as session:
         old_post.title = new_post.title
         old_post.content = new_post.content
@@ -67,10 +70,11 @@ async def update_post(id: int, new_post: models.PostRead):
 
 
 @router.delete("/{id}", 
-               summary='deleta um post especifico',
                description='',
                response_description='deletado com sucesso',
-               status_code=status.HTTP_204_NO_CONTENT)
+               status_code=status.HTTP_204_NO_CONTENT,
+               summary='deleta um post especifico',
+               )
 async def delete_post(id: int):
     post = read_posts_id(id)
     with Session(db.engine) as session:

@@ -19,20 +19,22 @@ class PostCreate(PostBase):
 
 
 class PostRead(PostBase):
+    id: int
     pass
 
 
 # ---
 
 
-class Users(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, sa_type=AutoString)
+    created_at: Optional[datetime] = Field(default=datetime.now())
+
+
+class Users(UserBase, table=True):
     password: str
-    created_at: Optional[datetime] = Field(default=datetime.now())
+    id: Optional[int] = Field(default=None, primary_key=True)
 
 
-class UserResponse(SQLModel):
-    id: int
-    email: EmailStr
-    created_at: Optional[datetime] = Field(default=datetime.now())
+class UserResponse(UserBase):
+    pass
