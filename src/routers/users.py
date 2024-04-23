@@ -9,11 +9,12 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.post(
-    "/", 
-    summary='cria um usuario',
-    description='',
-    response_description='',
-    status_code=status.HTTP_201_CREATED, response_model=models.UserResponse
+    "/",
+    summary="cria um usuario",
+    description="",
+    response_description="",
+    status_code=status.HTTP_201_CREATED,
+    response_model=models.UserResponse,
 )
 async def create_user(user: models.Users):
     user.password = utils.hash(user.password)
@@ -30,11 +31,13 @@ async def create_user(user: models.Users):
     return new_user
 
 
-@router.get("/{id}", 
-            summary='busca um usuario especifico',
-            description='',
-            response_description='',
-            response_model=models.UserResponse)
+@router.get(
+    "/{id}",
+    summary="busca um usuario especifico",
+    description="",
+    response_description="",
+    response_model=models.UserResponse,
+)
 async def read_user_id(id: int):
     with Session(db.engine) as session:
         user = session.get(models.Users, id)
@@ -45,5 +48,3 @@ async def read_user_id(id: int):
             )
         else:
             return user
-
-

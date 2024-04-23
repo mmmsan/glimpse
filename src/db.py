@@ -1,7 +1,9 @@
+from sqlalchemy.engine.interfaces import DBAPIType
 from sqlmodel import SQLModel, create_engine
+from config import settings
 
-db_url = "postgresql+psycopg2://postgres:123@localhost/glimpse"
-engine = create_engine(db_url, echo=True)
+
+engine = create_engine(settings.DB_URL, echo=True)
 
 
 def create_db_and_tables():
@@ -10,4 +12,3 @@ def create_db_and_tables():
 
 if __name__ == "__main__":
     create_db_and_tables()
-
