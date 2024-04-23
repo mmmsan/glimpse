@@ -1,7 +1,7 @@
 from starlette.status import HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 from fastapi import status, HTTPException, APIRouter
 from sqlmodel import Session
-import utils
+from auth import CRYPTO
 import models
 import db
 
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/users", tags=["users"])
     response_model=models.UserResponse,
 )
 async def create_user(user: models.Users):
-    user.password = utils.hash(user.password)
+    user.password = CRYPTO.hash(user.password)
     with Session(db.engine) as session:
         new_user = models.Users(email=user.email, password=user.password)
         try:
