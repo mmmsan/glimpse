@@ -41,6 +41,6 @@ class UserResponse(UserBase):
     pass
 
 
-class UserLogin(SQLModel):
-    email: EmailStr
-    password: str
+#class UserLogin(SQLModel):
+#    email: EmailStr
+#    password: str
