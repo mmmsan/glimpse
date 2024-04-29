@@ -44,3 +44,15 @@ class UserResponse(UserBase):
 #class UserLogin(SQLModel):
 #    email: EmailStr
 #    password: str
+
+
+class Token(SQLModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(SQLModel):
+    user_id: int
+    type: str
+    exp: datetime
+    iat: datetime

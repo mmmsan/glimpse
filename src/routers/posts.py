@@ -1,9 +1,10 @@
-from starlette.status import HTTP_404_NOT_FOUND
 from typing import List
-from fastapi import APIRouter, status, HTTPException
-from sqlmodel import Session, select
-import models
+
 import db
+import models
+from fastapi import APIRouter, HTTPException, status
+from sqlmodel import Session, select
+from starlette.status import HTTP_404_NOT_FOUND
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 
